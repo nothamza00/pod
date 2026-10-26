@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#0a0a0b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pod">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Pod</title>
+<style>
+:root{--bg:#0a0a0b;--body1:#1a1a1d;--body2:#0f0f11;--lcd:#0c1016;--ink:#cdd6e2;--dim:#6b7686;--acc:#3b78e0;--acc2:#2a5cb8}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;touch-action:none}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:-apple-system,"SF Pro Text",Helvetica,Arial,sans-serif;overflow:hidden}
+#app{height:100%;display:flex;align-items:center;justify-content:center;padding:env(safe-area-inset-top) 12px env(safe-area-inset-bottom)}
+#pod{width:min(340px,100%);height:min(600px,calc(100% - 16px));border-radius:26px;background:linear-gradient(160deg,var(--body1),var(--body2));
+ border:1px solid #2a2a2f;box-shadow:0 20px 50px #000,inset 0 1px 0 #ffffff14,inset 0 -2px 6px #0008;padding:18px 18px 22px;display:flex;flex-direction:column;gap:18px}
+#bezel{background:#050608;border-radius:10px;padding:6px;border:1px solid #23252b;box-shadow:inset 0 2px 8px #000;flex:0 0 46%}
+#lcd{height:100%;background:linear-gradient(180deg,#0e131b,var(--lcd));border-radius:5px;overflow:hidden;position:relative;font-size:14px}
+.hd{display:flex;align-items:center;justify-content:space-between;height:26px;padding:0 8px;background:linear-gradient(#1b2230,#121823);border-bottom:1px solid #1f2735;font-size:13px;letter-spacing:.3px}
+.hd b{font-weight:600}.hd .st{width:30px;color:var(--acc);font-size:11px}
+.bat{width:20px;height:9px;border:1px solid var(--dim);border-radius:2px;position:relative}.bat:after{content:"";position:absolute;inset:1px 5px 1px 1px;background:#5ec27a;border-radius:1px}
+.row{display:flex;justify-content:space-between;align-items:center;height:28px;padding:0 10px;white-space:nowrap}
+.row span:first-child{overflow:hidden;text-overflow:ellipsis;max-width:88%}
+.row.sel{background:linear-gradient(var(--acc),var(--acc2));color:#fff}
+.row .ar{color:var(--dim)}.row.sel .ar{color:#fff}
+.np{padding:12px 12px;display:flex;flex-direction:column;height:calc(100% - 26px)}
+.np .t{font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.np .a{color:var(--dim);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.np .src{font-size:10px;letter-spacing:1.5px;color:var(--acc);margin-bottom:8px}
+.np .sub{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;font-size:15px;color:#e8eef7;line-height:1.3;padding:4px 0}
+.bar{height:5px;background:#1c2433;border-radius:3px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--acc),#7aa8f5)}
+.tm{display:flex;justify-content:space-between;color:var(--dim);font-size:11px;margin-top:4px}
+.ly{padding:6px 10px;text-align:center;height:calc(100% - 26px);display:flex;flex-direction:column;justify-content:center;gap:5px}
+.ly div{color:#4b5568;font-size:13px;line-height:1.25}.ly .c{color:#fff;font-size:16px;font-weight:600}
+.msg{padding:16px;color:var(--dim);text-align:center;line-height:1.5}
+#wheelWrap{flex:1;display:flex;align-items:center;justify-content:center}
+#wheel{width:224px;height:224px;border-radius:50%;background:radial-gradient(circle at 50% 35%,#2a2a2f,#17171a);border:1px solid #303036;
+ box-shadow:0 4px 10px #000a,inset 0 1px 0 #ffffff18;position:relative}
+#wheel i{position:absolute;color:#7c7c86;font-style:normal;font-size:11px;letter-spacing:1px;font-weight:600;pointer-events:none}
+#wheel .m{top:16px;left:50%;transform:translateX(-50%)}
+#wheel .n{right:20px;top:50%;transform:translateY(-50%)}
+#wheel .p{left:20px;top:50%;transform:translateY(-50%)}
+#wheel .pl{bottom:16px;left:50%;transform:translateX(-50%)}
+#center{position:absolute;left:50%;top:50%;width:86px;height:86px;margin:-43px;border-radius:50%;background:radial-gradient(circle at 50% 30%,#303036,#1b1b1f);border:1px solid #3a3a41;box-shadow:inset 0 2px 4px #000a,0 1px 0 #ffffff12;pointer-events:none}
+#center.d{transform:scale(.96)}
+#amb{position:fixed;inset:0;background:#000;z-index:9;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;overflow:hidden}
+#amb.on{display:flex}
+#amb:before{content:"";position:absolute;width:140vmax;height:140vmax;left:50%;top:50%;margin:-70vmax;background:radial-gradient(circle,#1c3a7022 0%,#0000 45%);animation:br 9s ease-in-out infinite alternate}
+#amb:after{content:"";position:absolute;width:90vmax;height:90vmax;left:20%;top:60%;background:radial-gradient(circle,#5b2c8a1c 0%,#0000 50%);animation:dr 14s ease-in-out infinite alternate}
+@keyframes br{from{transform:scale(.7);opacity:.6}to{transform:scale(1.1);opacity:1}}
+@keyframes dr{from{transform:translate(0,0)}to{transform:translate(-30vmin,-25vmin)}}
+#amb>*{position:relative;z-index:1}
+#amb .clk{font-size:64px;font-weight:200;letter-spacing:2px;color:#d7deea;opacity:.85}
+#amb .tt{margin-top:22px;font-size:18px;color:#aab4c4}
+#amb .ls{margin-top:26px;font-size:24px;min-height:70px;color:#fff;max-width:520px;line-height:1.3;font-weight:300}
+#amb .hint{position:absolute;bottom:calc(24px + env(safe-area-inset-bottom));font-size:11px;color:#444;letter-spacing:1px}
+</style>
+</head>
+<body>
+<div id="app">
+ <div id="pod">
+  <div id="bezel"><div id="lcd"></div></div>
+  <div id="wheelWrap">
+   <div id="wheel"><i class="m">MENU</i><i class="n">⏭</i><i class="p">⏮</i><i class="pl">▶︎❙❙</i><div id="center"></div></div>
+  </div>
+ </div>
+</div>
+<div id="amb"><div class="clk" id="aclk"></div><div class="tt" id="att"></div><div class="ls" id="als"></div><div class="hint">TAP TO EXIT</div></div>
+<input id="file" type="file" accept="audio/*,.mp3,.m4a,.aac,.wav,.flac,.ogg,.lrc" multiple hidden>
+<audio id="au" preload="auto" playsinline></audio>
+
+<script>
+const $=s=>document.querySelector(s), lcd=$('#lcd'), au=$('#au');
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=s=>{s=Math.max(0,Math.floor(s||0));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+const LS={get:(k,d)=>{try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch{return d}},set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}}};
+const cfg={sound:LS.get('sound',true),online:LS.get('online',true),clientId:LS.get('clientId','')};
+
+/* ---------- click sound ---------- */
+let ctx;
+function unlock(){try{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();if(ctx.state==='suspended')ctx.resume()}catch{}}
+function click(strong){
+ if(!cfg.sound||!ctx)return;
+ const t=ctx.currentTime,o=ctx.createOscillator(),g=ctx.createGain();
+ o.type='square';o.frequency.setValueAtTime(strong?900:2200,t);o.frequency.exponentialRampToValueAtTime(strong?300:900,t+.012);
+ g.gain.setValueAtTime(strong?.12:.07,t);g.gain.exponentialRampToValueAtTime(.0001,t+.02);
+ o.connect(g).connect(ctx.destination);o.start(t);o.stop(t+.03);
+}
+
+/* ---------- storage (IndexedDB) ---------- */
+const dbp=new Promise((res,rej)=>{const r=indexedDB.open('pod',1);r.onupgradeneeded=()=>r.result.createObjectStore('songs',{keyPath:'id',autoIncrement:true});r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
+async function tx(mode,fn){const d=await dbp;return new Promise((res,rej)=>{const t=d.transaction('songs',mode);const r=fn(t.objectStore('songs'));t.oncomplete=()=>res(r&&r.result);t.onerror=()=>rej(t.error)})}
+let lib=[];
+async function loadLib(){try{lib=(await tx('readonly',s=>s.getAll()))||[];lib.sort((a,b)=>(a.artist+a.title).localeCompare(b.artist+b.title))}catch{lib=[]}}
+
+/* ---------- import ---------- */
+function parseName(n){
+ const base=n.replace(/\.[^.]+$/,'').replace(/_/g,' ').trim();
+ const m=base.split(/\s[-–]\s/);
+ return m.length>1?{artist:m[0].trim(),title:m.slice(1).join(' - ').trim()}:{artist:'Unknown',title:base};
+}
+$('#file').addEventListener('change',async e=>{
+ const files=[...e.target.files];e.target.value='';
+ const lrcs={};
+ for(const f of files){if(/\.lrc$/i.test(f.name))lrcs[f.name.replace(/\.lrc$/i,'').toLowerCase()]=await f.text()}
+ let n=0;
+ for(const f of files){
+  if(/\.lrc$/i.test(f.name))continue;
+  if(!(f.type.startsWith('audio')||/\.(mp3|m4a|aac|wav|flac|ogg|opus|aiff?)$/i.test(f.name)))continue;
+  const p=parseName(f.name);
+  await tx('readwrite',s=>s.add({name:f.name,artist:p.artist,title:p.title,blob:f,lrc:lrcs[f.name.replace(/\.[^.]+$/,'').toLowerCase()]||null}));
+  n++;flash('Importing… '+n);
+ }
+ await loadLib();flash(n+' song'+(n===1?'':'s')+' added');
+});
+let flashMsg='',flashT;function flash(m){flashMsg=m;clearTimeout(flashT);flashT=setTimeout(()=>{flashMsg='';render()},2200);render()}
+
+/* ---------- lyrics ---------- */
+let lyr=[],lyrState='none',lyrIdx=-1;
+function parseLRC(txt){
+ const out=[];
+ for(const line of txt.split(/\r?\n/)){
+  const ts=[...line.matchAll(/\[(\d+):(\d+(?:\.\d+)?)\]/g)];if(!ts.length)continue;
+  const text=line.replace(/\[[^\]]*\]/g,'').trim();
+  for(const m of ts)out.push({t:+m[1]*60+ +m[2],text});
+ }
+ return out.sort((a,b)=>a.t-b.t);
+}
+async function loadLyrics(tr){
+ lyr=[];lyrIdx=-1;lyrState='loading';
+ const key='lrc:'+(tr.artist+'|'+tr.title).toLowerCase();
+ try{
+  if(tr.lrc){lyr=parseLRC(tr.lrc);lyrState=lyr.length?'ok':'none';if(lyr.length)return}
+  const c=LS.get(key,null);if(c){lyr=parseLRC(c);lyrState='ok';return}
+  if(!cfg.online||!navigator.onLine){lyrState='none';return}
+  const id=tr.id;
+  let data=null;
+  const q=new URLSearchParams({artist_name:tr.artist==='Unknown'?'':tr.artist,track_name:tr.title});
+  if(tr.dur)q.set('duration',Math.round(tr.dur));
+  let r=await fetch('https://lrclib.net/api/get?'+q);
+  if(r.ok)data=await r.json();
+  if(!data||!data.syncedLyrics){
+   r=await fetch('https://lrclib.net/api/search?q='+encodeURIComponent((tr.artist==='Unknown'?'':tr.artist+' ')+tr.title));
+   if(r.ok){const a=await r.json();data=a.find(x=>x.syncedLyrics)||null}
+  }
+  if(cur&&cur.id!==id)return;
+  if(data&&data.syncedLyrics){LS.set(key,data.syncedLyrics);lyr=parseLRC(data.syncedLyrics);lyrState='ok'}else lyrState='none';
+ }catch{lyrState='none'}
+}
+function curLine(){return lyrIdx>=0&&lyr[lyrIdx]?lyr[lyrIdx].text:''}
+function updLyr(){
+ const p=pos();let i=-1;
+ for(let k=0;k<lyr.length;k++){if(lyr[k].t<=p+.15)i=k;else break}
+ lyrIdx=i;
+}
+
+/* ---------- playback model ---------- */
+let cur=null,qi=-1,shuffle=false,src='local';
+const sp={on:false,tok:null,exp:0,item:null,playing:false,prog:0,ts:0,dur:0};
+function pos(){
+ if(src==='spotify'&&sp.item)return (sp.prog+(sp.playing?Date.now()-sp.ts:0))/1000;
+ return au.currentTime||0;
+}
+function isPlaying(){return src==='spotify'?sp.playing:!au.paused&&!au.ended}
+function dur(){return src==='spotify'?sp.dur/1000:(au.duration||0)}
+async function playIndex(i){
+ if(!lib.length)return;
+ qi=(i+lib.length)%lib.length;const s=lib[qi];
+ src='local';
+ if(au.dataset.url)URL.revokeObjectURL(au.dataset.url);
+ const u=URL.createObjectURL(s.blob);au.dataset.url=u;au.src=u;
+ cur={id:'L'+s.id,title:s.title,artist:s.artist,lrc:s.lrc,dur:0};
+ try{await au.play()}catch{}
+ setMedia();loadLyrics(cur);render();
+}
+function next(){
+ if(src==='spotify')return spCtl('next');
+ if(!lib.length)return;
+ playIndex(shuffle?Math.floor(Math.random()*lib.length):qi+1);
+}
+function prev(){
+ if(src==='spotify')return spCtl('previous');
+ if(au.currentTime>3){au.currentTime=0;return}
+ playIndex(qi-1);
+}
+function toggle(){
+ if(src==='spotify')return spCtl(sp.playing?'pause':'play');
+ if(!cur){if(lib.length)playIndex(0);return}
+ au.paused?au.play():au.pause();
+}
+au.addEventListener('ended',next);
+au.addEventListener('loadedmetadata',()=>{if(cur&&src==='local'){cur.dur=au.duration;}});
+au.addEventListener('play',()=>{render();if('mediaSession' in navigator)navigator.mediaSession.playbackState='playing'});
+au.addEventListener('pause',()=>{render();if('mediaSession' in navigator)navigator.mediaSession.playbackState='paused'});
+function setMedia(){
+ if(!('mediaSession' in navigator)||!cur)return;
+ navigator.mediaSession.metadata=new MediaMetadata({title:cur.title,artist:cur.artist,album:'Pod'});
+ const h=(a,f)=>{try{navigator.mediaSession.setActionHandler(a,f)}catch{}};
+ h('play',toggle);h('pause',toggle);h('nexttrack',next);h('previoustrack',prev);
+ h('seekto',d=>{if(d.seekTime!=null)au.currentTime=d.seekTime});
+}
+
+/* ---------- Spotify (PKCE, no backend) ---------- */
+const REDIR=location.origin+location.pathname.replace(/index\.html$/,'');
+const b64=b=>btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+async function spConnect(){
+ if(!cfg.clientId){flash('Set Client ID first');return}
+ const v=b64(crypto.getRandomValues(new Uint8Array(48)));
+ const ch=b64(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(v)));
+ LS.set('spv',v);
+ location.href='https://accounts.spotify.com/authorize?'+new URLSearchParams({client_id:cfg.clientId,response_type:'code',redirect_uri:REDIR,
+  code_challenge_method:'S256',code_challenge:ch,scope:'user-read-currently-playing user-read-playback-state user-modify-playback-state'});
+}
+async function spTokenReq(body){
+ const r=await fetch('https://accounts.spotify.com/api/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({client_id:cfg.clientId,...body})});
+ if(!r.ok)throw 0;const j=await r.json();
+ LS.set('spt',{a:j.access_token,r:j.refresh_token||LS.get('spt',{}).r,e:Date.now()+j.expires_in*1000-30000});
+}
+async function spAuthCode(){
+ const q=new URLSearchParams(location.search),c=q.get('code');
+ if(!c)return;history.replaceState({},'',location.pathname);
+ try{await spTokenReq({grant_type:'authorization_code',code:c,redirect_uri:REDIR,code_verifier:LS.get('spv','')});flash('Spotify linked')}catch{flash('Spotify link failed')}
+}
+async function spTok(){
+ const t=LS.get('spt',null);if(!t)return null;
+ if(Date.now()>t.e){try{await spTokenReq({grant_type:'refresh_token',refresh_token:t.r})}catch{return null}return LS.get('spt').a}
+ return t.a;
+}
+function spLinked(){return !!LS.get('spt',null)}
+async function spApi(path,method='GET'){
+ const t=await spTok();if(!t)return null;
+ try{return await fetch('https://api.spotify.com/v1'+path,{method,headers:{Authorization:'Bearer '+t}})}catch{return null}
+}
+async function spCtl(a){
+ const r=a==='next'||a==='previous'?await spApi('/me/player/'+a,'POST'):await spApi('/me/player/'+a,'PUT');
+ if(r&&r.status===403)flash('Spotify Premium needed');
+ setTimeout(spPoll,400);
+}
+async function spPoll(){
+ if(!spLinked()||document.hidden)return;
+ const r=await spApi('/me/player/currently-playing');
+ if(!r||r.status===204||!r.ok){sp.playing=false;if(src==='spotify'&&r&&r.status===204){}return}
+ const j=await r.json();if(!j||!j.item){sp.playing=false;return}
+ const it=j.item,id='S'+it.id;
+ sp.playing=!!j.is_playing;sp.prog=j.progress_ms;sp.ts=Date.now();sp.dur=it.duration_ms;sp.item=it;
+ if(sp.playing&&!au.paused)au.pause();
+ if(sp.playing||src==='spotify'){
+  src='spotify';
+  if(!cur||cur.id!==id){
+   cur={id,title:it.name,artist:(it.artists||[]).map(a=>a.name).join(', '),dur:it.duration_ms/1000};
+   loadLyrics({...cur,artist:it.artists[0]?.name||'',lrc:null});
+   if('mediaSession' in navigator)navigator.mediaSession.metadata=new MediaMetadata({title:cur.title,artist:cur.artist});
+  }
+ }
+}
+setInterval(spPoll,3000);
+
+/* ---------- UI state ---------- */
+const stack=[];
+function push(s){stack.push({sel:0,top:0,...s});click(true);render()}
+function pop(){if(stack.length>1){stack.pop();click(true);render()}}
+function top(){return stack[stack.length-1]}
+
+function mainMenu(){return{t:'menu',title:'Pod',build:()=>[
+ {l:'Music',ar:1,go:()=>push(musicMenu())},
+ {l:'Now Playing',ar:1,go:()=>push({t:'np',title:'Now Playing'})},
+ {l:'Lyrics',ar:1,go:()=>push({t:'lyrics',title:'Lyrics'})},
+ {l:'Spotify',ar:1,go:()=>push(spMenu())},
+ {l:'Ambient',ar:1,go:()=>ambient(true)},
+ {l:'Shuffle: '+(shuffle?'On':'Off'),go:()=>{shuffle=!shuffle;render()}},
+ {l:'Settings',ar:1,go:()=>push(setMenu())}]}}
+function musicMenu(){return{t:'menu',title:'Music',build:()=>[
+ {l:'Songs ('+lib.length+')',ar:1,go:()=>push(songsMenu())},
+ {l:'Shuffle All',go:()=>{if(lib.length){shuffle=true;playIndex(Math.floor(Math.random()*lib.length));push({t:'np',title:'Now Playing'})}}},
+ {l:'Import Songs…',go:()=>$('#file').click()}]}}
+function songsMenu(){return{t:'menu',title:'Songs',build:()=>lib.length?lib.map((s,i)=>({l:(s.artist!=='Unknown'?s.artist+' – ':'')+s.title,go:()=>{playIndex(i);push({t:'np',title:'Now Playing'})}})):[{l:'Empty – import songs',go:()=>$('#file').click()}]}}
+function spMenu(){return{t:'menu',title:'Spotify',build:()=>spLinked()?[
+ {l:'Now Playing (Spotify)',ar:1,go:()=>{spPoll();push({t:'np',title:'Spotify'})}},
+ {l:'Synced Lyrics',ar:1,go:()=>push({t:'lyrics',title:'Lyrics'})},
+ {l:'Disconnect',go:()=>{localStorage.removeItem('spt');sp.item=null;sp.playing=false;if(src==='spotify')src='local';render()}}]:[
+ {l:'Link Spotify',go:spConnect},
+ {l:'Client ID: '+(cfg.clientId?'set':'not set'),go:setClient}]}}
+function setClient(){const v=prompt('Paste your Spotify Client ID (see README)',cfg.clientId);if(v!==null){cfg.clientId=v.trim();LS.set('clientId',cfg.clientId);render()}}
+function setMenu(){return{t:'menu',title:'Settings',build:()=>[
+ {l:'Click Sound: '+(cfg.sound?'On':'Off'),go:()=>{cfg.sound=!cfg.sound;LS.set('sound',cfg.sound);render()}},
+ {l:'Online Lyrics: '+(cfg.online?'On':'Off'),go:()=>{cfg.online=!cfg.online;LS.set('online',cfg.online);render()}},
+ {l:'Spotify Client ID',go:setClient},
+ {l:'Clear Library',go:async()=>{if(confirm('Delete all imported songs?')){await tx('readwrite',s=>s.clear());await loadLib();au.pause();cur=null;flash('Library cleared')}}}]}}
+
+/* ---------- render ---------- */
+function render(){
+ const s=top();if(!s)return;
+ const icon=isPlaying()?'▶︎':(cur?'❙❙':'');
+ let h=`<div class="hd"><span class="st">${icon}</span><b>${esc(flashMsg||s.title)}</b><span class="bat"></span></div>`;
+ if(s.t==='menu'){
+  const items=s.items=s.build();s.sel=Math.min(s.sel,items.length-1);
+  const vis=6;if(s.sel<s.top)s.top=s.sel;if(s.sel>=s.top+vis)s.top=s.sel-vis+1;
+  h+=items.slice(s.top,s.top+vis).map((it,k)=>`<div class="row${s.top+k===s.sel?' sel':''}"><span>${esc(it.l)}</span>${it.ar?'<span class="ar">›</span>':''}</div>`).join('');
+ }else if(s.t==='np'){
+  if(!cur)h+=`<div class="msg">Nothing playing.<br>Pick a song from Music,<br>or link Spotify.</div>`;
+  else{const p=pos(),d=dur()||0;
+   h+=`<div class="np"><div class="src">${src==='spotify'?'SPOTIFY':'THIS DEVICE'}</div><div class="t">${esc(cur.title)}</div><div class="a">${esc(cur.artist)}</div>
+   <div class="sub">${esc(curLine())||(lyrState==='loading'?'<span style="color:#4b5568">…</span>':'')}</div>
+   <div class="bar"><i style="width:${d?Math.min(100,p/d*100):0}%"></i></div><div class="tm"><span>${fmt(p)}</span><span>-${fmt(d-p)}</span></div></div>`}
+ }else if(s.t==='lyrics'){
+  if(!cur)h+=`<div class="msg">Play something first.</div>`;
+  else if(!lyr.length)h+=`<div class="msg">${lyrState==='loading'?'Searching lyrics…':'No synced lyrics found.<br>Import a matching .lrc file<br>or go online once.'}</div>`;
+  else{const i=Math.max(0,lyrIdx);const L=k=>lyr[k]?esc(lyr[k].text||'♪'):'&nbsp;';
+   h+=`<div class="ly"><div>${L(i-2)}</div><div>${L(i-1)}</div><div class="c">${lyrIdx<0?'♪':L(i)}</div><div>${L(i+1)}</div><div>${L(i+2)}</div></div>`}
+ }
+ lcd.innerHTML=h;
+ if($('#amb').classList.contains('on')){
+  const n=new Date();
+  $('#aclk').textContent=(n.getHours()%12||12)+':'+String(n.getMinutes()).padStart(2,'0');
+  $('#att').textContent=cur?cur.title+' — '+cur.artist:'';
+  $('#als').textContent=curLine();
+ }
+}
+setInterval(()=>{updLyr();const t=top();if(t&&(t.t!=='menu')||$('#amb').classList.contains('on'))render()},250);
+
+/* ---------- ambient mode ---------- */
+let wl=null;
+async function ambient(on){
+ $('#amb').classList.toggle('on',on);
+ if(on){render();try{wl=await navigator.wakeLock?.request('screen')}catch{}}else{try{wl&&wl.release()}catch{}wl=null}
+}
+$('#amb').addEventListener('click',()=>ambient(false));
+document.addEventListener('visibilitychange',async()=>{if(!document.hidden&&$('#amb').classList.contains('on')){try{wl=await navigator.wakeLock?.request('screen')}catch{}}spPoll()});
+
+/* ---------- click wheel ---------- */
+const wheel=$('#wheel');let last=null,acc=0,moved=0,cx=0,cy=0;
+function scroll(d){
+ const s=top();
+ if(s.t==='menu'){const n=s.items.length;const ns=Math.max(0,Math.min(n-1,s.sel+d));if(ns!==s.sel){s.sel=ns;click();render()}}
+ else if(s.t==='np'&&src==='local'&&cur){au.currentTime=Math.max(0,Math.min(au.duration||0,au.currentTime+d*5));click();render()}
+}
+wheel.addEventListener('pointerdown',e=>{
+ unlock();const r=wheel.getBoundingClientRect();cx=r.left+r.width/2;cy=r.top+r.height/2;
+ last=Math.atan2(e.clientY-cy,e.clientX-cx);acc=0;moved=0;wheel.setPointerCapture(e.pointerId);
+ if(Math.hypot(e.clientX-cx,e.clientY-cy)<46)$('#center').classList.add('d');
+});
+wheel.addEventListener('pointermove',e=>{
+ if(last==null)return;
+ const a=Math.atan2(e.clientY-cy,e.clientX-cx);let d=a-last;
+ if(d>Math.PI)d-=2*Math.PI;if(d<-Math.PI)d+=2*Math.PI;last=a;acc+=d;moved+=Math.abs(d);
+ const step=.5;while(acc>step){acc-=step;scroll(1)}while(acc<-step){acc+=step;scroll(-1)}
+});
+wheel.addEventListener('pointerup',e=>{
+ $('#center').classList.remove('d');
+ if(last==null)return;last=null;
+ if(moved>.3)return;
+ const dx=e.clientX-cx,dy=e.clientY-cy;
+ if(Math.hypot(dx,dy)<46){const s=top();click(true);
+  if(s.t==='menu'){const it=s.items[s.sel];it&&it.go&&it.go()}
+  else if(s.t==='np')toggle();return}
+ const a=Math.atan2(dy,dx)*180/Math.PI;click(true);
+ if(a>-135&&a<=-45)pop();else if(a>-45&&a<=45)next();else if(a>45&&a<=135)toggle();else prev();
+});
+wheel.addEventListener('pointercancel',()=>{last=null;$('#center').classList.remove('d')});
+
+/* ---------- boot ---------- */
+(async()=>{
+ await loadLib();await spAuthCode();
+ stack.push({sel:0,top:0,...mainMenu()});render();
+ if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+ if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();
+ spPoll();
+})();
+</script>
+</body>
+</html>
