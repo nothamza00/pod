@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Pod">
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <title>Pod</title>
 <style>
 :root{--bg:#0a0a0b;--body1:#1a1a1d;--body2:#0f0f11;--lcd:#0c1016;--ink:#cdd6e2;--dim:#6b7686;--acc:#3b78e0;--acc2:#2a5cb8}
@@ -205,7 +205,7 @@ function setMedia(){
 }
 
 /* ---------- Spotify (PKCE, no backend) ---------- */
-const REDIR=location.origin+location.pathname;
+const REDIR=location.origin+location.pathname.replace(/index\.html$/,'');
 const b64=b=>btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 async function spConnect(){
  if(!cfg.clientId){flash('Set Client ID first');return}
@@ -366,7 +366,7 @@ wheel.addEventListener('pointercancel',()=>{last=null;$('#center').classList.rem
 (async()=>{
  await loadLib();await spAuthCode();
  stack.push({sel:0,top:0,...mainMenu()});render();
- if('serviceWorker' in navigator)navigator.serviceWorker.register('SW.js').catch(()=>{});
+ if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
  if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();
  spPoll();
 })();
